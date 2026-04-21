@@ -3304,7 +3304,7 @@ body {
   opacity: 1 !important; /* Override the folder-level opacity: 0 */
 }
 
-.workspace-title-row .package-add-btn {
+/* .workspace-title-row .package-add-btn {
   background: none;
   border: 1px solid #28a745;
   width: 16px;
@@ -3324,9 +3324,9 @@ body {
   background-color: #28a745;
   color: white;
   transform: scale(1.1);
-}
+} */
 
-.workspace-title-row .package-actions button {
+/* .workspace-title-row .package-actions button {
   background: none;
   border: 1px solid;
   width: 16px;
@@ -3339,7 +3339,7 @@ body {
   font-size: 10px;
   font-weight: bold;
   transition: all 0.15s;
-}
+} */
 
 
 
