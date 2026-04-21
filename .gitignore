@@ -2,6 +2,7 @@
 node_modules/
 /.pnp
 .pnp.js
+package-lock.json
 
 # Testing
 /coverage
@@ -20,10 +21,10 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # Configuration files (contains user workspaces)
 config/
-*.log
 
 # IDE
 .vscode/
@@ -31,3 +32,21 @@ config/
 
 # OS
 Thumbs.db
+
+# Documentation files (project-specific)
+DRAG_DROP_ENHANCEMENTS.md
+IMPLEMENTATION_SUMMARY.md
+ROOT_FOLDER_DRAG_FIX.md
+TERMINAL_FIX.md
+
+# Test and debug files
+debug-ticket-workflow.sh
+simple-test.sh
+test-pty-interaction.sh
+
+# Platform-specific run files
+run.bat
+run-simple.sh
+
+# Scripts folder (contains project-specific scripts)
+scripts/
