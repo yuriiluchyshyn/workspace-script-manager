@@ -107,16 +107,9 @@ function XTerminal({
           return true; // Передаємо Ctrl+C в термінал для зупинки процесу
         }
 
-        // Ctrl+V: Вставка через Clipboard API для надійності
+        // Ctrl+V: Let xterm handle paste natively via onData handler
         if (event.code === 'KeyV') {
-          if (navigator.clipboard && navigator.clipboard.readText) {
-            navigator.clipboard.readText().then(text => {
-              if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-                wsRef.current.send(JSON.stringify({ type: 'input', data: text }));
-              }
-            }).catch(err => console.error('Failed to read clipboard contents: ', err));
-          }
-          return false; // Блокуємо дефолтну поведінку браузера
+          return true; // Allow default xterm paste behavior
         }
 
         // Ctrl+X, Ctrl+A, Ctrl+Z, Ctrl+L, Ctrl+W, Ctrl+U, Ctrl+R: 
