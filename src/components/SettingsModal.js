@@ -162,18 +162,34 @@ function SettingsModal({ onClose, onSave, onKillAll }) {
         <div style={{ marginTop: '20px', padding: '15px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '6px' }}>
           <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#856404' }}>Danger Zone</h4>
           <p style={{ margin: '0 0 15px 0', fontSize: '12px', color: '#856404' }}>
-            This action will stop all running scripts across all workspaces. Use with caution.
+            These actions are destructive and cannot be undone.
           </p>
-          <button 
-            className="btn btn-danger"
-            onClick={() => {
-              onKillAll();
-              onClose();
-            }}
-            title="Kill all running scripts in all workspaces"
-          >
-            🔥 Kill All Scripts
-          </button>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button 
+              className="btn btn-danger"
+              onClick={() => {
+                onKillAll();
+                onClose();
+              }}
+              title="Kill all running scripts in all workspaces"
+            >
+              🔥 Kill All Scripts
+            </button>
+            <button 
+              className="btn btn-danger"
+              onClick={() => {
+                if (window.confirm('This will delete ALL your workspaces and settings from browser storage. This cannot be undone.\n\nAre you sure?')) {
+                  localStorage.removeItem('runner-yl-config');
+                  localStorage.removeItem('runner-yl-workspaces');
+                  localStorage.removeItem('runner-yl-settings');
+                  window.location.reload();
+                }
+              }}
+              title="Clear all data from browser storage"
+            >
+              🗑️ Clear Browser Storage
+            </button>
+          </div>
         </div>
 
         <div className="modal-actions">
