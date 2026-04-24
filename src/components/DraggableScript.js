@@ -41,6 +41,7 @@ function DraggableScript({
       ref={setNodeRef}
       className={`script-container ${isDragging ? 'dragging' : ''}`}
       style={{ opacity: isDragging ? 0.4 : 1 }}
+      title={script.name}
     >
       <div className={`tree-script ${isSelected ? 'selected' : ''}`}>
         <div className="script-buttons">
@@ -93,6 +94,7 @@ function DraggableScript({
           <span 
             className="tree-script-name"
             onClick={() => onScriptSelect(script)}
+            title={script.name}
           >{script.name}</span>
           {scriptTerminalCount > 0 && (
             <span className="terminal-count" title={`${scriptTerminalCount} terminal${scriptTerminalCount > 1 ? 's' : ''}`}>

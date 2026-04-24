@@ -23,14 +23,41 @@ app.use(cors());
 app.use(express.json());
 
 // Configuration file paths
-const CONFIG_DIR = path.join(process.cwd(), 'config');
-const WORKSPACES_FILE = path.join(CONFIG_DIR, 'workspaces.json');
-const SETTINGS_FILE = path.join(CONFIG_DIR, 'settings.json');
+// User-level config: ~/runner-yl/config.json defines where data is stored
+const USER_CONFIG_DIR = path.join(os.homedir(), 'runner-yl');
+const USER_CONFIG_FILE = path.join(USER_CONFIG_DIR, 'config.json');
 
-// Ensure config directory exists
-if (!fs.existsSync(CONFIG_DIR)) {
-  fs.mkdirSync(CONFIG_DIR, { recursive: true });
+// Ensure user config directory exists
+if (!fs.existsSync(USER_CONFIG_DIR)) {
+  fs.mkdirSync(USER_CONFIG_DIR, { recursive: true });
 }
+
+// Load or create user config
+let userConfig = { dataDir: USER_CONFIG_DIR };
+if (fs.existsSync(USER_CONFIG_FILE)) {
+  try {
+    userConfig = { ...userConfig, ...JSON.parse(fs.readFileSync(USER_CONFIG_FILE, 'utf8')) };
+  } catch (error) {
+    console.error('Error reading user config, using defaults:', error.message);
+  }
+} else {
+  // Create default config file
+  fs.writeFileSync(USER_CONFIG_FILE, JSON.stringify({ dataDir: USER_CONFIG_DIR }, null, 2));
+  console.log(`Created default config at: ${USER_CONFIG_FILE}`);
+}
+
+const DATA_DIR = userConfig.dataDir;
+const WORKSPACES_FILE = path.join(DATA_DIR, 'workspaces.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+console.log(`[server] User config: ${USER_CONFIG_FILE}`);
+console.log(`[server] Data directory: ${DATA_DIR}`);
+console.log(`[server] Workspaces file: ${WORKSPACES_FILE}`);
 
 // Default settings
 const DEFAULT_SETTINGS = {
