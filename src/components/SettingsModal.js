@@ -160,6 +160,48 @@ function SettingsModal({ onClose, onSave, onKillAll }) {
           </ul>
         </div>
 
+        <div style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: '6px' }}>
+          <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#495057' }}>Backup & Restore</h4>
+          <p style={{ margin: '0 0 15px 0', fontSize: '12px', color: '#6c757d' }}>
+            Export your workspaces to a JSON file or import from a backup.
+          </p>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button 
+              className="btn btn-secondary"
+              onClick={async () => {
+                try {
+                  await exportWorkspaces();
+                } catch (error) {
+                  alert('Export failed: ' + error.message);
+                }
+              }}
+              title="Download workspaces as JSON file"
+            >
+              📤 Export Configuration
+            </button>
+            <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+              📥 Import Configuration
+              <input 
+                type="file" 
+                accept=".json" 
+                style={{ display: 'none' }}
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  try {
+                    const result = await importWorkspaces(file);
+                    alert(result.message);
+                    window.location.reload(); // Refresh to show imported workspaces
+                  } catch (error) {
+                    alert('Import failed: ' + error.message);
+                  }
+                  e.target.value = ''; // Reset file input
+                }}
+              />
+            </label>
+          </div>
+        </div>
+
         <div style={{ marginTop: '20px', padding: '15px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '6px' }}>
           <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#856404' }}>Danger Zone</h4>
           <p style={{ margin: '0 0 15px 0', fontSize: '12px', color: '#856404' }}>
@@ -178,17 +220,20 @@ function SettingsModal({ onClose, onSave, onKillAll }) {
             </button>
             <button 
               className="btn btn-danger"
-              onClick={() => {
-                if (window.confirm('This will delete ALL your workspaces and settings from browser storage. This cannot be undone.\n\nAre you sure?')) {
-                  localStorage.removeItem('runner-yl-config');
-                  localStorage.removeItem('runner-yl-workspaces');
-                  localStorage.removeItem('runner-yl-settings');
-                  window.location.reload();
+              onClick={async () => {
+                if (window.confirm('This will delete ALL your workspaces and settings. This cannot be undone.\n\nAre you sure?')) {
+                  try {
+                    const result = await clearStorage();
+                    alert(result.message);
+                    window.location.reload();
+                  } catch (error) {
+                    alert('Clear failed: ' + error.message);
+                  }
                 }
               }}
-              title="Clear all data from browser storage"
+              title="Clear all data from storage"
             >
-              🗑️ Clear Browser Storage
+              🗑️ Clear All Storage
             </button>
           </div>
         </div>
