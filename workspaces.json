@@ -1,0 +1,371 @@
+[
+  {
+    "id": "1776756476887",
+    "name": "Phoenix",
+    "description": "",
+    "scripts": [
+      {
+        "id": "placeholder-1776757188444",
+        "name": ".folder-placeholder",
+        "description": "Folder placeholder - will be hidden",
+        "filePath": "",
+        "packagePath": "APP",
+        "type": "placeholder",
+        "isPlaceholder": true,
+        "addedAt": "2026-04-21T07:39:48.444Z",
+        "detectedParams": []
+      },
+      {
+        "id": "1776757291887",
+        "name": "git-prs",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/git-prs.cjs",
+        "buttonLabel": "git-prs",
+        "packagePath": "GIT/PR",
+        "detectedParams": [],
+        "type": "cjs",
+        "addedAt": "2026-04-21T07:41:31.887Z"
+      },
+      {
+        "id": "placeholder-1776757331300",
+        "name": ".folder-placeholder",
+        "description": "Folder placeholder - will be hidden",
+        "filePath": "",
+        "packagePath": "GIT",
+        "type": "placeholder",
+        "isPlaceholder": true,
+        "addedAt": "2026-04-21T07:42:11.300Z",
+        "detectedParams": []
+      },
+      {
+        "id": "1776757358645",
+        "name": "full-run",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/run-for-yurii.sh",
+        "buttonLabel": "run-for-yurii",
+        "packagePath": "APP",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-21T07:42:38.645Z"
+      },
+      {
+        "id": "1776790404806",
+        "name": "switch-to-develop",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/switch-to-develop.sh",
+        "buttonLabel": "switch-to-develop",
+        "packagePath": "GIT",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-21T16:53:24.806Z"
+      },
+      {
+        "id": "placeholder-1776790421844",
+        "name": ".folder-placeholder",
+        "description": "Folder placeholder - will be hidden",
+        "filePath": "",
+        "packagePath": "GIT_JIRA",
+        "type": "placeholder",
+        "isPlaceholder": true,
+        "addedAt": "2026-04-21T16:53:41.844Z",
+        "detectedParams": []
+      },
+      {
+        "id": "1776790445965",
+        "name": "toggle-pr-status",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/toggle-pr-status.sh",
+        "buttonLabel": "toggle-pr-status",
+        "packagePath": "GIT/PR",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-21T16:54:05.965Z"
+      },
+      {
+        "id": "1776790460877",
+        "name": "verify-gpg-config",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/verify-gpg-config.sh",
+        "buttonLabel": "verify-gpg-config",
+        "packagePath": "GIT",
+        "detectedParams": [],
+        "type": "sh",
+        "addedAt": "2026-04-21T16:54:20.877Z"
+      },
+      {
+        "id": "1776790481536",
+        "name": "push-branches",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/push-branches.sh",
+        "buttonLabel": "push-branches",
+        "packagePath": "GIT/Branche",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-21T16:54:41.536Z"
+      },
+      {
+        "id": "1776790490432",
+        "name": "pull-branches",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/pull-branches.sh",
+        "buttonLabel": "pull-branches",
+        "packagePath": "GIT/Branche",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-21T16:54:50.432Z"
+      },
+      {
+        "id": "placeholder-1776790502098",
+        "name": ".folder-placeholder",
+        "description": "Folder placeholder - will be hidden",
+        "filePath": "",
+        "packagePath": "GIT/PR",
+        "type": "placeholder",
+        "isPlaceholder": true,
+        "addedAt": "2026-04-21T16:55:02.098Z",
+        "detectedParams": []
+      },
+      {
+        "id": "placeholder-1776790662692",
+        "name": ".folder-placeholder",
+        "description": "Folder placeholder - will be hidden",
+        "filePath": "",
+        "packagePath": "GIT/Branche",
+        "type": "placeholder",
+        "isPlaceholder": true,
+        "addedAt": "2026-04-21T16:57:42.692Z",
+        "detectedParams": []
+      },
+      {
+        "id": "1776852870031",
+        "name": "OpenAPI-scanner",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/SwaggerScanner/swagger-scanner/start.sh",
+        "buttonLabel": "start",
+        "packagePath": "APP",
+        "detectedParams": [],
+        "type": "sh",
+        "addedAt": "2026-04-22T10:14:30.031Z"
+      },
+      {
+        "id": "1776853369560",
+        "name": "approve-prs",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/approve-prs.sh",
+        "buttonLabel": "approve-prs",
+        "packagePath": "GIT/PR",
+        "detectedParams": [],
+        "type": "sh",
+        "addedAt": "2026-04-22T10:22:49.560Z"
+      },
+      {
+        "id": "1776854065143",
+        "name": "deployed-tickets",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/deployed-tickets.sh",
+        "buttonLabel": "deployed-tickets",
+        "packagePath": "GIT",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg3",
+            "type": "text",
+            "description": "Positional argument 3",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-22T10:34:25.143Z"
+      },
+      {
+        "id": "1776873644871",
+        "name": "ticket-workflow",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/ticket-workflow.sh",
+        "buttonLabel": "ticket-workflow",
+        "packagePath": "GIT_JIRA",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg3",
+            "type": "text",
+            "description": "Positional argument 3",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg4",
+            "type": "text",
+            "description": "Positional argument 4",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg5",
+            "type": "text",
+            "description": "Positional argument 5",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-22T16:00:44.871Z"
+      },
+      {
+        "id": "1777032027188",
+        "name": "link-local-packages",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/link-local-packages.sh",
+        "buttonLabel": "link-local-packages",
+        "packagePath": "APP",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg3",
+            "type": "text",
+            "description": "Positional argument 3",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-24T12:00:27.188Z"
+      },
+      {
+        "id": "1777033516597",
+        "name": "restart-mfes",
+        "description": "",
+        "filePath": "/Volumes/Work/projects/ccsi-ptg/phoenix/.myScripts/restart-mfes.sh",
+        "buttonLabel": "restart-mfes",
+        "packagePath": "APP",
+        "detectedParams": [
+          {
+            "name": "arg1",
+            "type": "text",
+            "description": "Positional argument 1",
+            "defaultValue": "",
+            "required": true
+          },
+          {
+            "name": "arg2",
+            "type": "text",
+            "description": "Positional argument 2",
+            "defaultValue": "",
+            "required": true
+          }
+        ],
+        "type": "sh",
+        "addedAt": "2026-04-24T12:25:16.597Z"
+      }
+    ],
+    "createdAt": "2026-04-21T07:27:56.887Z"
+  }
+]
