@@ -100,8 +100,17 @@ export const exportWorkspaces = async () => {
 export const importWorkspaces = async (file) => {
   const text = await file.text();
   const importData = JSON.parse(text);
-  if (!importData.workspaces || !Array.isArray(importData.workspaces)) {
-    throw new Error('Invalid import data format');
+  
+  // Handle both formats: direct array or wrapped object
+  let workspacesToImport;
+  if (Array.isArray(importData)) {
+    // Direct array format (legacy)
+    workspacesToImport = importData;
+  } else if (importData.workspaces && Array.isArray(importData.workspaces)) {
+    // Wrapped object format (new export format)
+    workspacesToImport = importData.workspaces;
+  } else {
+    throw new Error('Invalid import data format. Expected array of workspaces or object with workspaces property.');
   }
 
   if (await checkBackend()) {
@@ -109,14 +118,14 @@ export const importWorkspaces = async (file) => {
       const response = await fetch(`${API_BASE_URL}/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(importData)
+        body: JSON.stringify({ workspaces: workspacesToImport })
       });
       if (response.ok) return await response.json();
     } catch {}
   }
 
-  await saveWorkspaces(importData.workspaces);
-  return { success: true, message: `Imported ${importData.workspaces.length} workspaces`, count: importData.workspaces.length };
+  await saveWorkspaces(workspacesToImport);
+  return { success: true, message: `Imported ${workspacesToImport.length} workspaces`, count: workspacesToImport.length };
 };
 
 export const clearStorage = async () => {

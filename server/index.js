@@ -882,18 +882,25 @@ app.post('/api/import', (req, res) => {
   try {
     const importData = req.body;
     
-    // Validate import data structure
-    if (!importData.workspaces || !Array.isArray(importData.workspaces)) {
-      return res.status(400).json({ success: false, message: 'Invalid import data format' });
+    // Handle both formats: direct array or wrapped object
+    let workspacesToImport;
+    if (Array.isArray(importData)) {
+      // Direct array format (legacy)
+      workspacesToImport = importData;
+    } else if (importData.workspaces && Array.isArray(importData.workspaces)) {
+      // Wrapped object format (new export format)
+      workspacesToImport = importData.workspaces;
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid import data format. Expected array of workspaces or object with workspaces property.' });
     }
     
-    const success = saveWorkspacesToFile(importData.workspaces);
+    const success = saveWorkspacesToFile(workspacesToImport);
     
     if (success) {
       res.json({ 
         success: true, 
-        message: `Imported ${importData.workspaces.length} workspaces successfully`,
-        count: importData.workspaces.length
+        message: `Imported ${workspacesToImport.length} workspaces successfully`,
+        count: workspacesToImport.length
       });
     } else {
       res.status(500).json({ success: false, message: 'Failed to import workspaces' });
