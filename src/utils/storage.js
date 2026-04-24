@@ -118,3 +118,29 @@ export const importWorkspaces = async (file) => {
   await saveWorkspaces(importData.workspaces);
   return { success: true, message: `Imported ${importData.workspaces.length} workspaces`, count: importData.workspaces.length };
 };
+
+export const clearStorage = async () => {
+  // Clear backend storage if available
+  if (await checkBackend()) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/clear`, {
+        method: 'POST'
+      });
+      if (response.ok) {
+        // Also clear localStorage to be safe
+        Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+        return { success: true, message: 'All storage cleared successfully' };
+      }
+    } catch (error) {
+      console.error('Failed to clear backend storage:', error);
+    }
+  }
+
+  // Clear localStorage
+  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+  
+  // Reset backend availability check
+  backendAvailable = null;
+  
+  return { success: true, message: 'Browser storage cleared successfully' };
+};

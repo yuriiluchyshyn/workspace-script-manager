@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { exportWorkspaces, importWorkspaces } from '../utils/storage';
+import { exportWorkspaces, importWorkspaces, clearStorage } from '../utils/storage';
 
 function SettingsModal({ onClose, onSave, onKillAll }) {
   const [settings, setSettings] = useState({

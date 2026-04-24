@@ -904,6 +904,37 @@ app.post('/api/import', (req, res) => {
   }
 });
 
+// Clear storage endpoint
+app.post('/api/clear', (req, res) => {
+  try {
+    // Clear workspaces file
+    if (fs.existsSync(WORKSPACES_FILE)) {
+      fs.unlinkSync(WORKSPACES_FILE);
+    }
+    
+    // Clear settings file
+    if (fs.existsSync(SETTINGS_FILE)) {
+      fs.unlinkSync(SETTINGS_FILE);
+    }
+    
+    // Clear user config file
+    if (fs.existsSync(USER_CONFIG_FILE)) {
+      fs.unlinkSync(USER_CONFIG_FILE);
+    }
+    
+    // Recreate default config
+    fs.writeFileSync(USER_CONFIG_FILE, JSON.stringify({ dataDir: USER_CONFIG_DIR }, null, 2));
+    
+    res.json({ 
+      success: true, 
+      message: 'All storage cleared successfully. Server data has been reset.'
+    });
+  } catch (error) {
+    console.error('Clear storage error:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear storage: ' + error.message });
+  }
+});
+
 // Run script endpoint
 app.post('/api/script/run', (req, res) => {
   const { workspaceId, scriptId, script } = req.body;
