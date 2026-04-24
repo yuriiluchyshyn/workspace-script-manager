@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import WorkspaceDetail from './components/WorkspaceDetail';
 import CreateWorkspaceModal from './components/CreateWorkspaceModal';
 import SettingsModal from './components/SettingsModal';
-import { loadWorkspaces, saveWorkspaces } from './utils/storage';
+import StorageSetupModal from './components/StorageSetupModal';
+import { loadWorkspaces, saveWorkspaces, isStorageSetUp, initStorage } from './utils/storage';
 
 function App() {
   const [workspaces, setWorkspaces] = useState([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showStorageSetup, setShowStorageSetup] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [workspacePanelWidth, setWorkspacePanelWidth] = useState(200); // Smaller default width
   const [isResizing, setIsResizing] = useState(false);
@@ -17,9 +19,12 @@ function App() {
 
   useEffect(() => {
     const loadData = async () => {
+      if (!isStorageSetUp()) {
+        setShowStorageSetup(true);
+        return;
+      }
       const savedWorkspaces = await loadWorkspaces();
       setWorkspaces(savedWorkspaces);
-      // Auto-select first workspace if available
       if (savedWorkspaces.length > 0 && !selectedWorkspace) {
         setSelectedWorkspace(savedWorkspaces[0]);
       }
@@ -363,6 +368,18 @@ function App() {
           onClose={() => setShowSettingsModal(false)}
           onSave={handleSettingsSave}
           onKillAll={handleKillAll}
+        />
+      )}
+
+      {showStorageSetup && (
+        <StorageSetupModal 
+          onComplete={async () => {
+            initStorage();
+            setShowStorageSetup(false);
+            const saved = await loadWorkspaces();
+            setWorkspaces(saved);
+            if (saved.length > 0) setSelectedWorkspace(saved[0]);
+          }}
         />
       )}
     </div>
