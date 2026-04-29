@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import ScriptParameterManager from './ScriptParameterManager';
 
@@ -18,7 +19,9 @@ function DraggableScript({
   const [showInfo, setShowInfo] = useState(false);
   const [infoText, setInfoText] = useState(null);
   const [loadingInfo, setLoadingInfo] = useState(false);
-  const infoRef = useRef(null);
+  const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
+  const infoBtnRef = useRef(null);
+  const popupRef = useRef(null);
 
   const {
     attributes,
@@ -34,16 +37,21 @@ function DraggableScript({
   });
 
   // Close info popup on click outside
+  const handleClickOutside = useCallback((e) => {
+    if (
+      popupRef.current && !popupRef.current.contains(e.target) &&
+      infoBtnRef.current && !infoBtnRef.current.contains(e.target)
+    ) {
+      setShowInfo(false);
+    }
+  }, []);
+
   useEffect(() => {
-    if (!showInfo) return;
-    const handleClickOutside = (e) => {
-      if (infoRef.current && !infoRef.current.contains(e.target)) {
-        setShowInfo(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
+    if (showInfo) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showInfo]);
+  }, [showInfo, handleClickOutside]);
 
   // Hide placeholder scripts
   if (script.isPlaceholder) {
@@ -67,6 +75,28 @@ function DraggableScript({
       setShowInfo(false);
       return;
     }
+
+    // Position popup relative to the button
+    if (infoBtnRef.current) {
+      const rect = infoBtnRef.current.getBoundingClientRect();
+      const popupWidth = 380;
+      const popupHeight = 300;
+      let left = rect.right + 8;
+      let top = rect.top;
+
+      // If it would go off the right edge, show on the left side
+      if (left + popupWidth > window.innerWidth) {
+        left = rect.left - popupWidth - 8;
+      }
+      // If it would go off the bottom, shift up
+      if (top + popupHeight > window.innerHeight) {
+        top = window.innerHeight - popupHeight - 10;
+      }
+      if (top < 10) top = 10;
+
+      setPopupPos({ top, left });
+    }
+
     setShowInfo(true);
 
     // If we already fetched, don't fetch again
@@ -86,17 +116,46 @@ function DraggableScript({
         setInfoText(script.description || 'No description available.');
       }
     } catch {
-      // Fallback to stored description (e.g. on Vercel)
       setInfoText(script.description || 'No description available (backend not reachable).');
     }
     setLoadingInfo(false);
   };
 
+  // Render popup via portal so it's always on top
+  const infoPopup = showInfo ? ReactDOM.createPortal(
+    <div 
+      ref={popupRef} 
+      className="script-info-popup"
+      style={{ top: popupPos.top, left: popupPos.left }}
+    >
+      <div className="script-info-popup-header">
+        <strong>{script.name}</strong>
+        <button 
+          className="script-info-popup-close"
+          onClick={(e) => { e.stopPropagation(); setShowInfo(false); }}
+        >×</button>
+      </div>
+      <div className="script-info-popup-body">
+        {loadingInfo ? (
+          <span style={{ color: '#999' }}>Loading...</span>
+        ) : (
+          <pre className="script-info-popup-text">{infoText}</pre>
+        )}
+      </div>
+      {script.filePath && (
+        <div className="script-info-popup-footer">
+          <small>{script.filePath}</small>
+        </div>
+      )}
+    </div>,
+    document.body
+  ) : null;
+
   return (
     <div 
       ref={setNodeRef}
       className={`script-container ${isDragging ? 'dragging' : ''}`}
-      style={{ opacity: isDragging ? 0.4 : 1, position: 'relative' }}
+      style={{ opacity: isDragging ? 0.4 : 1 }}
       title={tooltip}
     >
       <div className={`tree-script ${isSelected ? 'selected' : ''}`}>
@@ -127,6 +186,7 @@ function DraggableScript({
             />
           )}
           <button 
+            ref={infoBtnRef}
             className="tree-btn tree-btn-info" 
             onClick={handleInfoClick} 
             title="Script Info"
@@ -166,30 +226,7 @@ function DraggableScript({
         </div>
       </div>
 
-      {/* Info popup */}
-      {showInfo && (
-        <div ref={infoRef} className="script-info-popup">
-          <div className="script-info-popup-header">
-            <strong>{script.name}</strong>
-            <button 
-              className="script-info-popup-close"
-              onClick={(e) => { e.stopPropagation(); setShowInfo(false); }}
-            >×</button>
-          </div>
-          <div className="script-info-popup-body">
-            {loadingInfo ? (
-              <span style={{ color: '#999' }}>Loading...</span>
-            ) : (
-              <pre className="script-info-popup-text">{infoText}</pre>
-            )}
-          </div>
-          {script.filePath && (
-            <div className="script-info-popup-footer">
-              <small>{script.filePath}</small>
-            </div>
-          )}
-        </div>
-      )}
+      {infoPopup}
     </div>
   );
 }
