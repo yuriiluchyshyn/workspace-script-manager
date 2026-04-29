@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import ScriptParameterManager from './ScriptParameterManager';
 
@@ -15,6 +15,11 @@ function DraggableScript({
   onAddTerminal,
   onUpdateScript
 }) {
+  const [showInfo, setShowInfo] = useState(false);
+  const [infoText, setInfoText] = useState(null);
+  const [loadingInfo, setLoadingInfo] = useState(false);
+  const infoRef = useRef(null);
+
   const {
     attributes,
     listeners,
@@ -27,6 +32,18 @@ function DraggableScript({
       script: script
     }
   });
+
+  // Close info popup on click outside
+  useEffect(() => {
+    if (!showInfo) return;
+    const handleClickOutside = (e) => {
+      if (infoRef.current && !infoRef.current.contains(e.target)) {
+        setShowInfo(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showInfo]);
 
   // Hide placeholder scripts
   if (script.isPlaceholder) {
@@ -44,11 +61,42 @@ function DraggableScript({
   if (script.buttonLabel && script.buttonLabel !== script.name) tooltipParts.push(`Label: ${script.buttonLabel}`);
   const tooltip = tooltipParts.join('\n');
 
+  const handleInfoClick = async (e) => {
+    e.stopPropagation();
+    if (showInfo) {
+      setShowInfo(false);
+      return;
+    }
+    setShowInfo(true);
+
+    // If we already fetched, don't fetch again
+    if (infoText !== null) return;
+
+    setLoadingInfo(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/script-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: script.filePath })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setInfoText(data.fullHeader || data.description || 'No description found in script file.');
+      } else {
+        setInfoText(script.description || 'No description available.');
+      }
+    } catch {
+      // Fallback to stored description (e.g. on Vercel)
+      setInfoText(script.description || 'No description available (backend not reachable).');
+    }
+    setLoadingInfo(false);
+  };
+
   return (
     <div 
       ref={setNodeRef}
       className={`script-container ${isDragging ? 'dragging' : ''}`}
-      style={{ opacity: isDragging ? 0.4 : 1 }}
+      style={{ opacity: isDragging ? 0.4 : 1, position: 'relative' }}
       title={tooltip}
     >
       <div className={`tree-script ${isSelected ? 'selected' : ''}`}>
@@ -78,6 +126,12 @@ function DraggableScript({
               isInline={true}
             />
           )}
+          <button 
+            className="tree-btn tree-btn-info" 
+            onClick={handleInfoClick} 
+            title="Script Info"
+            style={{ color: showInfo ? '#007bff' : undefined }}
+          >ℹ</button>
           <button 
             className="tree-btn tree-btn-edit" 
             onClick={(e) => { e.stopPropagation(); onEditScript(script); }} 
@@ -111,6 +165,31 @@ function DraggableScript({
           )}
         </div>
       </div>
+
+      {/* Info popup */}
+      {showInfo && (
+        <div ref={infoRef} className="script-info-popup">
+          <div className="script-info-popup-header">
+            <strong>{script.name}</strong>
+            <button 
+              className="script-info-popup-close"
+              onClick={(e) => { e.stopPropagation(); setShowInfo(false); }}
+            >×</button>
+          </div>
+          <div className="script-info-popup-body">
+            {loadingInfo ? (
+              <span style={{ color: '#999' }}>Loading...</span>
+            ) : (
+              <pre className="script-info-popup-text">{infoText}</pre>
+            )}
+          </div>
+          {script.filePath && (
+            <div className="script-info-popup-footer">
+              <small>{script.filePath}</small>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

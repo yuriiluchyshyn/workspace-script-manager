@@ -700,28 +700,148 @@ app.post('/api/script-description', (req, res) => {
       return res.json({ description: '' });
     }
     
-    // Read only first 20 lines for performance
     const content = fs.readFileSync(resolvedPath, 'utf8');
-    const topLines = content.split('\n').slice(0, 20).join('\n');
-    const description = extractScriptDescription(topLines);
+    const description = extractScriptDescription(content);
     
-    res.json({ description });
+    // Also extract the full header block for the info popup
+    const fullHeader = extractFullHeader(content);
+    
+    res.json({ description, fullHeader });
   } catch (error) {
-    res.json({ description: '' });
+    res.json({ description: '', fullHeader: '' });
   }
 });
 
-// Extract @description from script comment lines
+// Extract the full comment header block from a script for the info popup
+function extractFullHeader(content) {
+  const lines = content.split('\n');
+  
+  // Try JSDoc block first
+  const jsdocMatch = content.match(/\/\*\*([\s\S]*?)\*\//);
+  if (jsdocMatch) {
+    return jsdocMatch[1].split('\n')
+      .map(l => l.trim().replace(/^\*\s?/, '').trim())
+      .filter(l => l && !l.startsWith('@param') && !l.startsWith('@returns'))
+      .join('\n');
+  }
+  
+  // Try Python docstring
+  const pyDocMatch = content.match(/(?:"""|''')([\s\S]*?)(?:"""|''')/);
+  if (pyDocMatch) {
+    return pyDocMatch[1].trim();
+  }
+  
+  // Try shell/python header comments
+  const headerLines = [];
+  let foundShebang = false;
+  for (let i = 0; i < Math.min(lines.length, 40); i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('#!')) { foundShebang = true; continue; }
+    if (trimmed === '' && foundShebang && headerLines.length === 0) continue;
+    if (trimmed.startsWith('#')) {
+      headerLines.push(trimmed.replace(/^#+\s*/, ''));
+    } else if (headerLines.length > 0) {
+      break;
+    }
+  }
+  if (headerLines.length > 0) return headerLines.join('\n');
+  
+  // Try // comments
+  const slashLines = [];
+  for (let i = 0; i < Math.min(lines.length, 30); i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('"use strict"') || trimmed === '') continue;
+    if (trimmed.startsWith('//')) {
+      slashLines.push(trimmed.replace(/^\/\/\s*/, ''));
+    } else if (slashLines.length > 0) {
+      break;
+    }
+  }
+  if (slashLines.length > 0) return slashLines.join('\n');
+  
+  return '';
+}
+
+// Extract description from script header comments
+// Supports: JSDoc /** ... */, Python docstrings """ ... """, shell # comments, // comments
+// Also supports explicit @description tag
 function extractScriptDescription(content) {
-  const lines = content.split('\n').slice(0, 20); // Only check first 20 lines
-  for (const line of lines) {
-    const trimmed = line.trim();
-    // Match: # @description ..., // @description ..., or """ @description ... (Python docstring)
+  const lines = content.split('\n');
+  
+  // 1. Check for explicit @description tag first (highest priority)
+  for (let i = 0; i < Math.min(lines.length, 30); i++) {
+    const trimmed = lines[i].trim();
     const match = trimmed.match(/^(?:#|\/\/|\/?\*\*?|"""|''')\s*@description\s+(.+)/i);
     if (match) {
       return match[1].trim();
     }
   }
+  
+  // 2. Extract from JSDoc block comment /** ... */ (JS/CJS)
+  const jsdocMatch = content.match(/\/\*\*([\s\S]*?)\*\//);
+  if (jsdocMatch) {
+    const block = jsdocMatch[1];
+    const descLines = block.split('\n')
+      .map(l => l.trim().replace(/^\*\s?/, '').trim())
+      .filter(l => l && !l.startsWith('@') && !l.startsWith('*'));
+    
+    // Take the first meaningful paragraph (title + description lines)
+    const desc = [];
+    for (const line of descLines) {
+      if (line === '' && desc.length > 0) break; // Stop at first blank line after content
+      if (line) desc.push(line);
+    }
+    if (desc.length > 0) return desc.join(' ');
+  }
+  
+  // 3. Extract from Python docstrings """ ... """ or ''' ... '''
+  const pyDocMatch = content.match(/(?:"""|''')([\s\S]*?)(?:"""|''')/);
+  if (pyDocMatch) {
+    const block = pyDocMatch[1];
+    const descLines = block.split('\n')
+      .map(l => l.trim())
+      .filter(l => l);
+    const desc = [];
+    for (const line of descLines) {
+      if (line === '' && desc.length > 0) break;
+      if (line) desc.push(line);
+    }
+    if (desc.length > 0) return desc.join(' ');
+  }
+  
+  // 4. Extract from shell/python header comments (consecutive # lines after shebang)
+  const headerComments = [];
+  let foundShebang = false;
+  for (let i = 0; i < Math.min(lines.length, 30); i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('#!')) {
+      foundShebang = true;
+      continue;
+    }
+    if (trimmed === '' && foundShebang && headerComments.length === 0) continue; // Skip blank after shebang
+    if (trimmed.startsWith('#')) {
+      const comment = trimmed.replace(/^#+\s*/, '').trim();
+      if (comment) headerComments.push(comment);
+    } else if (headerComments.length > 0) {
+      break; // Stop at first non-comment line
+    }
+  }
+  if (headerComments.length > 0) return headerComments.join(' ');
+  
+  // 5. Extract from // comment block at top (JS without JSDoc)
+  const slashComments = [];
+  for (let i = 0; i < Math.min(lines.length, 20); i++) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith('"use strict"') || trimmed === '') continue;
+    if (trimmed.startsWith('//')) {
+      const comment = trimmed.replace(/^\/\/\s*/, '').trim();
+      if (comment) slashComments.push(comment);
+    } else if (slashComments.length > 0) {
+      break;
+    }
+  }
+  if (slashComments.length > 0) return slashComments.join(' ');
+  
   return '';
 }
 
