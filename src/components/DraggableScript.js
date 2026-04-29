@@ -102,6 +102,12 @@ function DraggableScript({
     // If we already fetched, don't fetch again
     if (infoText !== null) return;
 
+    // Show manual description immediately while fetching from file
+    const manualDesc = script.description || '';
+    if (manualDesc) {
+      setInfoText(manualDesc);
+    }
+
     setLoadingInfo(true);
     try {
       const response = await fetch('http://localhost:3001/api/script-description', {
@@ -111,12 +117,22 @@ function DraggableScript({
       });
       if (response.ok) {
         const data = await response.json();
-        setInfoText(data.fullHeader || data.description || 'No description found in script file.');
-      } else {
-        setInfoText(script.description || 'No description available.');
+        const fileDesc = data.fullHeader || data.description || '';
+        if (fileDesc) {
+          // If we have both manual and file description, show file description
+          // (it's more detailed from the actual script header)
+          setInfoText(fileDesc);
+        } else if (!manualDesc) {
+          setInfoText('No description found.\n\nAdd a comment block at the top of your script:\n\n  JS:  /** description */\n  SH:  # description\n  PY:  """ description """');
+        }
+      } else if (!manualDesc) {
+        setInfoText('No description available.');
       }
     } catch {
-      setInfoText(script.description || 'No description available (backend not reachable).');
+      // Backend not reachable (e.g. Vercel) — keep manual description
+      if (!manualDesc) {
+        setInfoText('No description available (backend not reachable).');
+      }
     }
     setLoadingInfo(false);
   };
