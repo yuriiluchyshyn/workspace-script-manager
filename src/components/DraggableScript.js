@@ -36,12 +36,20 @@ function DraggableScript({
   const hasParameters = script.detectedParams && script.detectedParams.length > 0;
   const scriptTerminalCount = terminalTabs.filter(tab => tab.scriptId === script.id).length;
 
+  // Build tooltip with script details
+  const tooltipParts = [script.name];
+  if (script.description) tooltipParts.push(script.description);
+  if (script.filePath) tooltipParts.push(`Path: ${script.filePath}`);
+  if (script.type) tooltipParts.push(`Type: .${script.type}`);
+  if (script.buttonLabel && script.buttonLabel !== script.name) tooltipParts.push(`Label: ${script.buttonLabel}`);
+  const tooltip = tooltipParts.join('\n');
+
   return (
     <div 
       ref={setNodeRef}
       className={`script-container ${isDragging ? 'dragging' : ''}`}
       style={{ opacity: isDragging ? 0.4 : 1 }}
-      title={script.name}
+      title={tooltip}
     >
       <div className={`tree-script ${isSelected ? 'selected' : ''}`}>
         <div className="script-buttons">
@@ -94,7 +102,7 @@ function DraggableScript({
           <span 
             className="tree-script-name"
             onClick={() => onScriptSelect(script)}
-            title={script.name}
+            title={tooltip}
           >{script.name}</span>
           {scriptTerminalCount > 0 && (
             <span className="terminal-count" title={`${scriptTerminalCount} terminal${scriptTerminalCount > 1 ? 's' : ''}`}>
