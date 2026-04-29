@@ -100,7 +100,9 @@ function AddScriptModal({ onClose, onAdd, currentPackage = null }) {
         setFormData(prev => ({ 
           ...prev, 
           type: result.scriptType,
-          detectedParams: result.parameters || []
+          detectedParams: result.parameters || [],
+          // Auto-populate description from script @description comment
+          description: prev.description || result.description || ''
         }));
       }
     } catch (error) {

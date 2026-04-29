@@ -663,18 +663,67 @@ app.post('/api/analyze-script', (req, res) => {
     // Analyze for interactive patterns
     const isInteractive = analyzeInteractivePatterns(content, scriptType);
     
+    // Extract description from script comments
+    const description = extractScriptDescription(content);
+    
     res.json({
       scriptType,
       parameters,
       filePath: resolvedPath,
       isInteractive,
-      interactiveFeatures: isInteractive.features
+      interactiveFeatures: isInteractive.features,
+      description
     });
     
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Read description from a script file
+app.post('/api/script-description', (req, res) => {
+  const { filePath } = req.body;
+  
+  if (!filePath) {
+    return res.status(400).json({ error: 'No file path provided' });
+  }
+  
+  try {
+    let resolvedPath;
+    if (path.isAbsolute(filePath)) {
+      resolvedPath = filePath;
+    } else {
+      resolvedPath = path.resolve(process.cwd(), filePath);
+    }
+    
+    if (!fs.existsSync(resolvedPath)) {
+      return res.json({ description: '' });
+    }
+    
+    // Read only first 20 lines for performance
+    const content = fs.readFileSync(resolvedPath, 'utf8');
+    const topLines = content.split('\n').slice(0, 20).join('\n');
+    const description = extractScriptDescription(topLines);
+    
+    res.json({ description });
+  } catch (error) {
+    res.json({ description: '' });
+  }
+});
+
+// Extract @description from script comment lines
+function extractScriptDescription(content) {
+  const lines = content.split('\n').slice(0, 20); // Only check first 20 lines
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Match: # @description ..., // @description ..., or """ @description ... (Python docstring)
+    const match = trimmed.match(/^(?:#|\/\/|\/?\*\*?|"""|''')\s*@description\s+(.+)/i);
+    if (match) {
+      return match[1].trim();
+    }
+  }
+  return '';
+}
 
 function analyzeInteractivePatterns(content, scriptType) {
   const features = [];
