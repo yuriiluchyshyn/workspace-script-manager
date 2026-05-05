@@ -15,6 +15,7 @@ function App() {
   const [isResizing, setIsResizing] = useState(false);
   const [processInput, setProcessInput] = useState('');
   const [portInput, setPortInput] = useState('');
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const [workspacesCollapsed, setWorkspacesCollapsed] = useState(true);
 
   useEffect(() => {
@@ -167,13 +168,22 @@ function App() {
       <div className="header">
         <div className="header-title-row">
           <h1>Workspace Script Manager</h1>
-          <button 
-            className="btn-icon btn-settings" 
-            onClick={() => setShowSettingsModal(true)}
-            title="Settings"
-          >
-            ⚙️
-          </button>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button 
+              className="btn-icon btn-help" 
+              onClick={() => setShowHelpModal(true)}
+              title="How to use"
+            >
+              ❓
+            </button>
+            <button 
+              className="btn-icon btn-settings" 
+              onClick={() => setShowSettingsModal(true)}
+              title="Settings"
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
         
         {/* Process Management Tools */}
@@ -381,6 +391,63 @@ function App() {
             if (saved.length > 0) setSelectedWorkspace(saved[0]);
           }}
         />
+      )}
+
+      {showHelpModal && (
+        <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) setShowHelpModal(false); }}>
+          <div className="modal-content" style={{ maxWidth: '550px' }}>
+            <div className="modal-header">
+              <h3>How to Use Runner</h3>
+              <button className="modal-close-btn" onClick={() => setShowHelpModal(false)} type="button">×</button>
+            </div>
+            <div style={{ padding: '0', fontSize: '14px', lineHeight: '1.6' }}>
+              <div style={{ padding: '15px', background: '#e8f5e9', borderRadius: '6px', marginBottom: '15px' }}>
+                <strong>🖥️ For full functionality (run scripts from browser):</strong>
+                <p style={{ margin: '8px 0 0' }}>Start the local server on your computer:</p>
+                <pre style={{ background: '#1e1e1e', color: '#4ec9b0', padding: '10px', borderRadius: '4px', margin: '8px 0', fontSize: '13px', overflowX: 'auto' }}>
+{`cd /Volumes/Private/projects/runner
+npm start`}
+                </pre>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#555' }}>
+                  This starts the backend on port 3001. The browser connects to it for terminal and script execution.
+                </p>
+              </div>
+
+              <div style={{ padding: '15px', background: '#fff3e0', borderRadius: '6px', marginBottom: '15px' }}>
+                <strong>🌐 Without local server (current mode):</strong>
+                <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+                  <li>✅ Add/edit/organize scripts and workspaces</li>
+                  <li>✅ Import/export configuration</li>
+                  <li>✅ View script descriptions (ℹ️ button)</li>
+                  <li>⚠️ Run Script → copies command to clipboard</li>
+                  <li>❌ Terminal not available</li>
+                </ul>
+              </div>
+
+              <div style={{ padding: '15px', background: '#f3e5f5', borderRadius: '6px', marginBottom: '15px' }}>
+                <strong>📋 Quick Start:</strong>
+                <ol style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+                  <li>Clone the repo: <code>git clone https://github.com/yuriiluchyshyn/workspace-script-manager.git</code></li>
+                  <li>Install: <code>cd workspace-script-manager && npm install</code></li>
+                  <li>Run: <code>npm start</code></li>
+                  <li>Open <code>http://localhost:3000</code> for full features</li>
+                </ol>
+              </div>
+
+              <div style={{ padding: '15px', background: '#e3f2fd', borderRadius: '6px' }}>
+                <strong>💡 Tips:</strong>
+                <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+                  <li>Data is stored in <code>~/runner-yl/</code> (local) or localStorage (web)</li>
+                  <li>Use Settings → Import to load your <code>workspaces.json</code></li>
+                  <li>Add <code>@description</code> comment in scripts for auto-descriptions</li>
+                </ul>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={() => setShowHelpModal(false)}>Got it</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
