@@ -388,7 +388,12 @@ function App() {
             setShowStorageSetup(false);
             const saved = await loadWorkspaces();
             setWorkspaces(saved);
-            if (saved.length > 0) setSelectedWorkspace(saved[0]);
+            if (saved.length > 0) {
+              setSelectedWorkspace(saved[0]);
+            } else {
+              // First time setup — show help modal
+              setShowHelpModal(true);
+            }
           }}
         />
       )}
@@ -441,6 +446,20 @@ npm start`}
                   <li>Use Settings → Import to load your <code>workspaces.json</code></li>
                   <li>Add <code>@description</code> comment in scripts for auto-descriptions</li>
                 </ul>
+              </div>
+
+              <div style={{ padding: '15px', background: '#f5f5f5', borderRadius: '6px', marginTop: '15px', textAlign: 'center' }}>
+                <a 
+                  href="https://github.com/yuriiluchyshyn/workspace-script-manager" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: '#0366d6', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}
+                >
+                  ⭐ GitHub Repository
+                </a>
+                <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#666' }}>
+                  Source code, issues, and documentation
+                </p>
               </div>
             </div>
             <div className="modal-actions">
