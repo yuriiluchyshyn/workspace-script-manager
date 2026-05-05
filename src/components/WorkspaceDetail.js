@@ -910,11 +910,58 @@ function WorkspaceDetail({ workspace, onUpdate, onDelete }) {
   const handleRunScript = async (script) => {
     console.log('handleRunScript called for:', script.name);
     
+    // Check if backend is available
+    let backendAvailable = false;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const resp = await fetch('http://localhost:3001/api/health', { signal: controller.signal });
+      clearTimeout(timeout);
+      backendAvailable = resp.ok;
+    } catch {
+      backendAvailable = false;
+    }
+
+    // Build the full command
+    let command = script.filePath;
+    const paramArray = [];
+    if (script.detectedParams && script.detectedParams.length > 0) {
+      script.detectedParams.forEach(param => {
+        const paramKey = param.name || param.flag;
+        const isEnabled = script.parameterStates?.[paramKey] !== false;
+        const value = script.parameterValues?.[paramKey];
+        
+        if (isEnabled && value) {
+          if (param.flag) {
+            if (param.type === 'checkbox') {
+              if (value === true || value === 'true') {
+                paramArray.push(param.flag);
+              }
+            } else {
+              paramArray.push(param.flag, value);
+            }
+          } else {
+            paramArray.push(value);
+          }
+        }
+      });
+    }
+    if (paramArray.length > 0) {
+      command += ' ' + paramArray.join(' ');
+    }
+
+    // If backend not available, show copy-command popup
+    if (!backendAvailable) {
+      const copied = await navigator.clipboard.writeText(command).then(() => true).catch(() => false);
+      const msg = copied 
+        ? `Command copied to clipboard!\n\nRun in your terminal:\n${command}`
+        : `Backend server not running. Run this command in your terminal:\n\n${command}\n\nTo enable in-browser execution, start the local server:\n  cd ${window.location.hostname === 'localhost' ? '.' : '~/runner-yl'}\n  npm start`;
+      alert(msg);
+      return;
+    }
+    
     // Set flag to prevent collapse during script execution
     isRunningScriptRef.current = true;
-    
-    // Don't force script selection - let user browse other scripts while this one runs
-    // setSelectedScript(script);
     
     // Ensure script tree panel is not collapsed when running a script
     setScriptTreeCollapsed(false);
@@ -923,10 +970,10 @@ function WorkspaceDetail({ workspace, onUpdate, onDelete }) {
     setTimeout(() => {
       console.log('Timeout check - ensuring panel is expanded');
       setScriptTreeCollapsed(false);
-      isRunningScriptRef.current = false; // Clear flag after timeout
+      isRunningScriptRef.current = false;
     }, 500);
     
-    // Always use terminal mode for all scripts (like manual execution)
+    // Always use terminal mode for all scripts
     console.log(`Running script in terminal mode: ${script.name}`);
     
     // Create terminal tab and auto-execute the script
@@ -934,48 +981,16 @@ function WorkspaceDetail({ workspace, onUpdate, onDelete }) {
     
     // Wait a moment for terminal to initialize, then send the command
     setTimeout(() => {
-      // Build the command with parameters
-      let command = script.filePath;
-      
-      // Add parameters if any
-      const paramArray = [];
-      if (script.detectedParams && script.detectedParams.length > 0) {
-        script.detectedParams.forEach(param => {
-          const paramKey = param.name || param.flag;
-          const isEnabled = script.parameterStates?.[paramKey] !== false;
-          const value = script.parameterValues?.[paramKey];
-          
-          if (isEnabled && value) {
-            if (param.flag) {
-              if (param.type === 'checkbox') {
-                if (value === true || value === 'true') {
-                  paramArray.push(param.flag);
-                }
-              } else {
-                paramArray.push(param.flag, value);
-              }
-            } else {
-              paramArray.push(value);
-            }
-          }
-        });
-      }
-      
-      if (paramArray.length > 0) {
-        command += ' ' + paramArray.join(' ');
-      }
-      
-      // Find the XTerminal component and send the command directly
       console.log(`Auto-executing script: ${command}`);
       console.log(`Tab ID: ${tabId}`);
       
-      // We'll use a custom event to communicate with XTerminal
+      // Use a custom event to communicate with XTerminal
       const event = new CustomEvent('executeCommand', {
         detail: { tabId, command }
       });
       window.dispatchEvent(event);
       
-    }, 2000); // Wait 2 seconds for terminal to be ready
+    }, 2000);
   };
 
   const handleStopScript = async (script, specificTabId = null) => {

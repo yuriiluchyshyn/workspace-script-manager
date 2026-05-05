@@ -79,7 +79,29 @@ function AddScriptModal({ onClose, onAdd, currentPackage = null }) {
       }
     } catch (error) {
       console.error('Path validation error:', error);
-      setPathValidation({ valid: false, error: 'Validation failed' });
+      // Backend not available — do local validation (Vercel mode)
+      const fileName = filePath.split('/').pop().split('\\').pop();
+      const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+      const validExtensions = ['.sh', '.py', '.js', '.cjs'];
+      
+      if (validExtensions.includes(ext)) {
+        let scriptType = 'sh';
+        if (ext === '.py') scriptType = 'py';
+        else if (ext === '.cjs') scriptType = 'cjs';
+        else if (ext === '.js') scriptType = 'js';
+        
+        const nameWithoutExtension = fileName.replace(/\.[^/.]+$/, "");
+        
+        setPathValidation({ valid: true, type: scriptType, resolvedPath: filePath, localOnly: true });
+        setFormData(prev => ({ 
+          ...prev, 
+          type: scriptType,
+          name: prev.name || nameWithoutExtension,
+          buttonLabel: prev.buttonLabel || nameWithoutExtension
+        }));
+      } else {
+        setPathValidation({ valid: false, error: 'File must be .sh, .py, .js, or .cjs' });
+      }
     }
     setValidating(false);
   };
@@ -244,9 +266,12 @@ function AddScriptModal({ onClose, onAdd, currentPackage = null }) {
               }}>
                 {pathValidation.valid ? (
                   <div>
-                    ✅ <strong>Valid script found!</strong><br/>
+                    ✅ <strong>{pathValidation.localOnly ? 'Script path accepted' : 'Valid script found!'}</strong><br/>
                     Type: {pathValidation.type?.toUpperCase()} (auto-detected)<br/>
                     Path: {pathValidation.resolvedPath}
+                    {pathValidation.localOnly && (
+                      <><br/><em>Note: Path will be validated when local agent is running</em></>
+                    )}
                   </div>
                 ) : (
                   <div>
